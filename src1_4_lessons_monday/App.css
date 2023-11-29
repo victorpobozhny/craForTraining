@@ -1,0 +1,14 @@
+.App {
+  padding: 30px;
+  display: flex;
+}
+
+.App > div {
+  margin-right: 50px;
+}
+.btn {
+  background-color: wheat;
+}
+.btn-active {
+  background-color: aqua;
+}
