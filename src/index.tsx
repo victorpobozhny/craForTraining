@@ -1,19 +1,35 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import React, {MouseEvent} from 'react';
+import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+type UserWalletType = {
+    title: string
+    amount: number
+}
+type UserWalletPropsType = {
+    wallet: UserWalletType
+}
+
+export const UserWallet: React.FC<UserWalletPropsType> = (props) => {
+    return <div>title: {props.wallet.title}, amount: {props.wallet.amount}</div>
+}
+
+export const UserMoney = () => {
+    const wallets = [
+        {title: 'bitcoin', amount: 1},
+        {title: '$', amount: 100}
+    ]
+
+    return <div>
+        <UserWallet wallet={wallets[0]} />
+        <UserWallet wallet={wallets[1]} />
+    </div>
+}
+
+
+ReactDOM.render(
+    <UserMoney/>, document.getElementById('root')
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Какой тип данных представляет аргумент функции-обработчика?
+// Что надо написать вместо ххх, что бы в консоль вывело true?
