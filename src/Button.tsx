@@ -1,15 +1,17 @@
-import * as React from "react";
+import React from "react";
 
 type ButtonType = {
+    disabled: boolean
     name: string
-    onClick: ()=>void
+    onClick: () => void
 }
 
+export const Button: React.FC<ButtonType> = ({disabled, name, onClick}) => {
 
-export const Button: React.FC <ButtonType> = ({name, onClick}) => {
-    return (
-        <button onClick={onClick}>
-            {name}
-        </button>
+    const onClickHandler = () => {
+        onClick()
+    }
+    return(
+        <button className={'btn'} disabled={disabled} onClick={onClickHandler}>{name}</button>
     )
 }
