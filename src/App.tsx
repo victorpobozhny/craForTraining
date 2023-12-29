@@ -31,10 +31,12 @@ function App() {
     const [commonError, setCommonError] = useState(false)
     //режим настройки нашего счетчика. изначально отключен. когда включается, то на экране надпись и раздизэйбл кнопки set
     const [settingMode, setSettingMode] = useState(true)
-
+    const settingModeSetter = () => {
+        setSettingMode(true)
+    }
 
     const checkForError = (min: number, max: number) => {
-        if(min>=max || min<0 ){
+        if (min >= max || min < 0) {
             setCommonError(true)
         } else {
             setCommonError(false)
@@ -44,7 +46,7 @@ function App() {
     //функция изменения наших вводимых значений без добавления в localstorage
     const changeRange = (name: string, value: number) => {
         if (name == 'max value') {
-            checkForError(startValue ,value)
+            checkForError(startValue, value)
             setMaxValue(value)
         } else {
             checkForError(value, maxValue)
@@ -55,7 +57,7 @@ function App() {
     }
     //функция установки наших значений в localstorage, также выключает режим настройки и сбрасывает счетчик на нновое мин значение
     const setRange = () => {
-        if(!commonError) {
+        if (!commonError) {
             localStorage.setItem('maxValue', JSON.stringify(maxValue))
             localStorage.setItem('startValue', JSON.stringify(startValue))
             setSettingMode(false)
@@ -78,25 +80,26 @@ function App() {
 
     return (
         <div className="App">
-            <Settings
-                startValue={startValue}
-                maxValue={maxValue}
-                setRange={setRange}
-                changeRange={changeRange}
-                error={commonError}
-                settingMode={settingMode}
-            />
-
-
-            <Counter
-                count={count}
-                maxValue={maxValue}
-                resetState={resetState}
-                increaseClick={increaseClick}
-                startValue={startValue}
-                settingMode={settingMode}
-                error={commonError}
-            />
+            {settingMode
+                ? <Settings
+                    startValue={startValue}
+                    maxValue={maxValue}
+                    setRange={setRange}
+                    changeRange={changeRange}
+                    error={commonError}
+                    settingMode={settingMode}
+                />
+                : <Counter
+                    count={count}
+                    maxValue={maxValue}
+                    resetState={resetState}
+                    increaseClick={increaseClick}
+                    startValue={startValue}
+                    settingMode={settingMode}
+                    error={commonError}
+                    settingModeSetter = {settingModeSetter}
+                />
+            }
         </div>
     );
 }

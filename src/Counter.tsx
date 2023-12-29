@@ -6,13 +6,23 @@ type CounterProps = {
     count: number
     maxValue: number
     startValue: number
-    increaseClick: ()=>void
-    resetState: ()=>void
+    increaseClick: () => void
+    resetState: () => void
     settingMode: boolean
+    settingModeSetter: () => void
     error: boolean
 }
 
-const Counter: FC<CounterProps> = ({count, maxValue, startValue, increaseClick, resetState, settingMode, error}) => {
+const Counter: FC<CounterProps> = ({
+                                       count,
+                                       maxValue,
+                                       startValue,
+                                       increaseClick,
+                                       resetState,
+                                       settingMode,
+                                       settingModeSetter,
+                                       error
+                                   }) => {
     console.log('counter')
     return (
         <div className={'counter'}>
@@ -20,6 +30,7 @@ const Counter: FC<CounterProps> = ({count, maxValue, startValue, increaseClick, 
             <div className={'btnWrapper'}>
                 <Button name={'inc'} onClick={increaseClick} disabled={count == maxValue || settingMode || error}/>
                 <Button name={'reset'} onClick={resetState} disabled={count == startValue || settingMode || error}/>
+                <Button name={'set'} onClick={settingModeSetter} disabled={false}/>
             </div>
         </div>
     );

@@ -9,6 +9,7 @@ type SettingsProps = {
     changeRange: (name: string, value: number) => void
     error: boolean
     settingMode: boolean
+
 }
 
 
@@ -17,7 +18,8 @@ const Settings: FC<SettingsProps> = ({
                                          startValue,
                                          setRange, changeRange,
                                          error,
-                                         settingMode
+                                         settingMode,
+
                                      }) => {
     console.log('settings')
     const onClickHandler = () => {
