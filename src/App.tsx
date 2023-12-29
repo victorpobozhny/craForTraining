@@ -1,72 +1,104 @@
-import {Input} from "./Input";
-import {Button} from "./Button";
-import {useEffect, useState} from "react";
-import {Tasks} from "./Tasks";
-
-export type StateType = {
-    userId: number
-    id: number
-    title: string
-    completed: boolean
-}
-
-type FilterType = 'all' | 'active' | 'completed'
+import React, {useEffect, useMemo, useState} from 'react';
+import './App.css';
+import Counter from "./Counter";
+import Settings from "./Settings";
 
 function App() {
+    console.log('rendering')
 
-    const [state, setState] = useState<StateType[]>([])
-    const [title, setTitle] = useState('')
+    const [startValue, setStartValue] = useState(0)
+    const [maxValue, setMaxValue] = useState(5)
+
+    // один раз вызыввем useEffect и присваиваем максимальные и минимальные значения взяв их из localstorage если есть
     useEffect(() => {
-        console.log('fetching')
-        fetch('https://jsonplaceholder.typicode.com/todos')
-            .then(response => response.json())
-            .then(json => setState(json))
+        let startValueAsString = localStorage.getItem('startValue')
+        if (startValueAsString) {
+            let newValue = JSON.parse(startValueAsString)
+            setStartValue(newValue)
+            resetState()
+        }
+        let MaxValueAsString = localStorage.getItem('maxValue')
+        if (MaxValueAsString) {
+            let newValue = JSON.parse(MaxValueAsString)
+            setMaxValue(newValue)
+        }
     }, [])
 
-    const addItem = () => {
-        setState([{id: state.length + 1, userId: state.length + 1, title: title, completed: false}, ...state])
-        setTitle('')
+
+    //для экрана отображающего текущее значение счетчика
+    const [count, setCount] = useState<number>(startValue)
+    //для ошибки по всем вводам
+    const [commonError, setCommonError] = useState(false)
+    //режим настройки нашего счетчика. изначально отключен. когда включается, то на экране надпись и раздизэйбл кнопки set
+    const [settingMode, setSettingMode] = useState(true)
+
+
+    const checkForError = (min: number, max: number) => {
+        if(min>=max || min<0 ){
+            setCommonError(true)
+        } else {
+            setCommonError(false)
+        }
     }
 
-    const deleteItem = (ID: number) => {
-        setState(state.filter(el => el.id !== ID))
+    //функция изменения наших вводимых значений без добавления в localstorage
+    const changeRange = (name: string, value: number) => {
+        if (name == 'max value') {
+            checkForError(startValue ,value)
+            setMaxValue(value)
+        } else {
+            checkForError(value, maxValue)
+            setStartValue(value)
+        }
+
+        setSettingMode(true)
+    }
+    //функция установки наших значений в localstorage, также выключает режим настройки и сбрасывает счетчик на нновое мин значение
+    const setRange = () => {
+        if(!commonError) {
+            localStorage.setItem('maxValue', JSON.stringify(maxValue))
+            localStorage.setItem('startValue', JSON.stringify(startValue))
+            setSettingMode(false)
+            resetState()
+        }
+
+    }
+    //клик который увеличивает число на экране
+    const increaseClick = () => {
+        if (count < maxValue) {
+            setCount(count + 1)
+        }
     }
 
-    const updateItem = (ID: number, isDone: boolean) => {
-        setState(state.map(el => el.id == ID ? {...el, completed: isDone} : el))
-    }
 
-    const [filter, setFilter] = useState<FilterType>('all')
-    const setAllFilter = () => {
-        setFilter('all')
+    //сброс значчения на экране
+    const resetState = () => {
+        setCount(startValue)
     }
-    const setActiveFilter = () => {
-        setFilter('active')
-    }
-    const setCompletedFilter = () => {
-        setFilter('completed')
-    }
-
-    let filteredList = filter == 'active'?
-        state.filter(el=>!el.completed) :
-        filter == 'completed'?
-            state.filter(el=>el.completed) :
-            state
-
 
     return (
-        <div>
-            <Button name={'All'} onClick={setAllFilter}/>
-            <Button name={'Active'} onClick={setActiveFilter}/>
-            <Button name={'Completed'} onClick={setCompletedFilter}/>
-            <div>
-                <Input title={title} setTitle={setTitle}/>
-                <Button name={'Add Item'} onClick={addItem}/>
-            </div>
-            <Tasks state={filteredList} onClick={deleteItem} update={updateItem} />
-        </div>
-    )
-}
+        <div className="App">
+            <Settings
+                startValue={startValue}
+                maxValue={maxValue}
+                setRange={setRange}
+                changeRange={changeRange}
+                error={commonError}
+                settingMode={settingMode}
+            />
 
+
+            <Counter
+                count={count}
+                maxValue={maxValue}
+                resetState={resetState}
+                increaseClick={increaseClick}
+                startValue={startValue}
+                settingMode={settingMode}
+                error={commonError}
+            />
+        </div>
+    );
+}
 
 export default App;
