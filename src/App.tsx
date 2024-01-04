@@ -1,105 +1,180 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useState} from 'react';
 import './App.css';
-import Counter from "./Counter";
-import Settings from "./Settings";
+import {TaskType, Todolist} from './Todolist';
+import {v1} from 'uuid';
+import {AddItemForm} from './AddItemForm';
+import AppBar from '@mui/material/AppBar/AppBar';
+import {Button, Container, Grid, IconButton, Paper, Toolbar, Typography} from "@mui/material";
+import {Menu} from "@mui/icons-material";
+
+
+export type FilterValuesType = "all" | "active" | "completed";
+export type TodolistType = {
+    id: string
+    title: string
+    filter: FilterValuesType
+}
+
+type TasksStateType = {
+    [key: string]: Array<TaskType>
+}
+
 
 function App() {
-    console.log('rendering')
+    let todolistId1 = v1();
+    let todolistId2 = v1();
 
-    const [startValue, setStartValue] = useState(0)
-    const [maxValue, setMaxValue] = useState(5)
+    let [todolists, setTodolists] = useState<Array<TodolistType>>([
+        {id: todolistId1, title: "What to learn", filter: "all"},
+        {id: todolistId2, title: "What to buy", filter: "all"}
+    ])
 
-    // один раз вызыввем useEffect и присваиваем максимальные и минимальные значения взяв их из localstorage если есть
-    useEffect(() => {
-        let startValueAsString = localStorage.getItem('startValue')
-        if (startValueAsString) {
-            let newValue = JSON.parse(startValueAsString)
-            setStartValue(newValue)
-            resetState()
-        }
-        let MaxValueAsString = localStorage.getItem('maxValue')
-        if (MaxValueAsString) {
-            let newValue = JSON.parse(MaxValueAsString)
-            setMaxValue(newValue)
-        }
-    }, [])
+    let [tasks, setTasks] = useState<TasksStateType>({
+        [todolistId1]: [
+            {id: v1(), title: "HTML&CSS", isDone: true},
+            {id: v1(), title: "JS", isDone: true}
+        ],
+        [todolistId2]: [
+            {id: v1(), title: "Milk", isDone: true},
+            {id: v1(), title: "React Book", isDone: true}
+        ]
+    });
 
 
-    //для экрана отображающего текущее значение счетчика
-    const [count, setCount] = useState<number>(startValue)
-    //для ошибки по всем вводам
-    const [commonError, setCommonError] = useState(false)
-    //режим настройки нашего счетчика. изначально отключен. когда включается, то на экране надпись и раздизэйбл кнопки set
-    const [settingMode, setSettingMode] = useState(true)
-    const settingModeSetter = () => {
-        setSettingMode(true)
+    function removeTask(id: string, todolistId: string) {
+        //достанем нужный массив по todolistId:
+        let todolistTasks = tasks[todolistId];
+        // перезапишем в этом объекте массив для нужного тудулиста отфилтрованным массивом:
+        tasks[todolistId] = todolistTasks.filter(t => t.id != id);
+        // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+        setTasks({...tasks});
     }
 
-    const checkForError = (min: number, max: number) => {
-        if (min >= max || min < 0) {
-            setCommonError(true)
-        } else {
-            setCommonError(false)
-        }
+    function addTask(title: string, todolistId: string) {
+        let task = {id: v1(), title: title, isDone: false};
+        //достанем нужный массив по todolistId:
+        let todolistTasks = tasks[todolistId];
+        // перезапишем в этом объекте массив для нужного тудулиста копией, добавив в начало новую таску:
+        tasks[todolistId] = [task, ...todolistTasks];
+        // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+        setTasks({...tasks});
     }
 
-    //функция изменения наших вводимых значений без добавления в localstorage
-    const changeRange = (name: string, value: number) => {
-        if (name == 'max value') {
-            checkForError(startValue, value)
-            setMaxValue(value)
-        } else {
-            checkForError(value, maxValue)
-            setStartValue(value)
-        }
-
-        setSettingMode(true)
-    }
-    //функция установки наших значений в localstorage, также выключает режим настройки и сбрасывает счетчик на нновое мин значение
-    const setRange = () => {
-        if (!commonError) {
-            localStorage.setItem('maxValue', JSON.stringify(maxValue))
-            localStorage.setItem('startValue', JSON.stringify(startValue))
-            setSettingMode(false)
-            resetState()
-        }
-
-    }
-    //клик который увеличивает число на экране
-    const increaseClick = () => {
-        if (count < maxValue) {
-            setCount(count + 1)
+    function changeStatus(id: string, isDone: boolean, todolistId: string) {
+        //достанем нужный массив по todolistId:
+        let todolistTasks = tasks[todolistId];
+        // найдём нужную таску:
+        let task = todolistTasks.find(t => t.id === id);
+        //изменим таску, если она нашлась
+        if (task) {
+            task.isDone = isDone;
+            // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+            setTasks({...tasks});
         }
     }
 
+    function changeTaskTitle(id: string, newTitle: string, todolistId: string) {
+        //достанем нужный массив по todolistId:
+        let todolistTasks = tasks[todolistId];
+        // найдём нужную таску:
+        let task = todolistTasks.find(t => t.id === id);
+        //изменим таску, если она нашлась
+        if (task) {
+            task.title = newTitle;
+            // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+            setTasks({...tasks});
+        }
+    }
 
-    //сброс значчения на экране
-    const resetState = () => {
-        setCount(startValue)
+    function changeFilter(value: FilterValuesType, todolistId: string) {
+        let todolist = todolists.find(tl => tl.id === todolistId);
+        if (todolist) {
+            todolist.filter = value;
+            setTodolists([...todolists])
+        }
+    }
+
+    function removeTodolist(id: string) {
+        // засунем в стейт список тудулистов, id которых не равны тому, который нужно выкинуть
+        setTodolists(todolists.filter(tl => tl.id != id));
+        // удалим таски для этого тудулиста из второго стейта, где мы храним отдельно таски
+        delete tasks[id]; // удаляем св-во из объекта... значением которого являлся массив тасок
+        // засетаем в стейт копию объекта, чтобы React отреагировал перерисовкой
+        setTasks({...tasks});
+    }
+
+    function changeTodolistTitle(id: string, title: string) {
+        // найдём нужный todolist
+        const todolist = todolists.find(tl => tl.id === id);
+        if (todolist) {
+            // если нашёлся - изменим ему заголовок
+            todolist.title = title;
+            setTodolists([...todolists]);
+        }
+    }
+
+    function addTodolist(title: string) {
+        let newTodolistId = v1();
+        let newTodolist: TodolistType = {id: newTodolistId, title: title, filter: 'all'};
+        setTodolists([newTodolist, ...todolists]);
+        setTasks({
+            ...tasks,
+            [newTodolistId]: []
+        })
     }
 
     return (
         <div className="App">
-            {settingMode
-                ? <Settings
-                    startValue={startValue}
-                    maxValue={maxValue}
-                    setRange={setRange}
-                    changeRange={changeRange}
-                    error={commonError}
-                    settingMode={settingMode}
-                />
-                : <Counter
-                    count={count}
-                    maxValue={maxValue}
-                    resetState={resetState}
-                    increaseClick={increaseClick}
-                    startValue={startValue}
-                    settingMode={settingMode}
-                    error={commonError}
-                    settingModeSetter = {settingModeSetter}
-                />
-            }
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton edge="start" color="inherit" aria-label="menu">
+                        <Menu />
+                    </IconButton>
+                    <Typography variant="h6">
+                        News
+                    </Typography>
+                    <Button color="inherit">Login</Button>
+                </Toolbar>
+            </AppBar>
+            <Container fixed>
+                <Grid container style={{padding: "20px"}}>
+                    <AddItemForm addItem={addTodolist}/>
+                </Grid>
+                <Grid container spacing={3}>
+                    {
+                        todolists.map(tl => {
+                            let allTodolistTasks = tasks[tl.id];
+                            let tasksForTodolist = allTodolistTasks;
+
+                            if (tl.filter === "active") {
+                                tasksForTodolist = allTodolistTasks.filter(t => t.isDone === false);
+                            }
+                            if (tl.filter === "completed") {
+                                tasksForTodolist = allTodolistTasks.filter(t => t.isDone === true);
+                            }
+
+                            return <Grid key={tl.id} item>
+                                <Paper style={{padding: "10px"}}>
+                                    <Todolist
+                                        key={tl.id}
+                                        id={tl.id}
+                                        title={tl.title}
+                                        tasks={tasksForTodolist}
+                                        removeTask={removeTask}
+                                        changeFilter={changeFilter}
+                                        addTask={addTask}
+                                        changeTaskStatus={changeStatus}
+                                        filter={tl.filter}
+                                        removeTodolist={removeTodolist}
+                                        changeTaskTitle={changeTaskTitle}
+                                        changeTodolistTitle={changeTodolistTitle}
+                                    />
+                                </Paper>
+                            </Grid>
+                        })
+                    }
+                </Grid>
+            </Container>
         </div>
     );
 }
