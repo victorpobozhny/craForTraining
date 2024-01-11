@@ -15,7 +15,9 @@ type TasksActionsType =
     | RemoveTodolistActionType
 
 
-export const tasksReducer = (state: TasksStateType, action: TasksActionsType): TasksStateType => {
+const initialState: TasksStateType = {}
+
+export const tasksReducer = (state: TasksStateType = initialState, action: TasksActionsType): TasksStateType => {
     const {type, payload} = action
     switch (type) {
         case "REMOVE-TASK":
@@ -48,8 +50,7 @@ export const tasksReducer = (state: TasksStateType, action: TasksActionsType): T
             delete newState[payload.id]
             return newState
         default:
-            throw new Error('Bad Action Type')
-
+            return state
     }
 }
 
