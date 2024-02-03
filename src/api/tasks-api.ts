@@ -7,13 +7,13 @@ export const tasksAPI = {
         return instance.get<GetTasksResponseType>(`/todo-lists/${todolistId}/tasks`)
     },
     createTask(todolistId: string, payload: { title: string }) {
-        return instance.post<ResponseType<{"item": TaskType}>>(`/todo-lists/${todolistId}/tasks`, {title: payload.title})
+        return instance.post<ResponseType<{ "item": TaskType }>>(`/todo-lists/${todolistId}/tasks`, {title: payload.title})
     },
-    updateTask (todolistId: string, taskId: string, payload: {title: string}) {
-        return instance.put<ResponseType>( `/todo-lists/${todolistId}/tasks/${taskId}`, {title: payload.title})
+    updateTask(todolistId: string, taskId: string, payload: { title: string }) {
+        return instance.put<ResponseType>(`/todo-lists/${todolistId}/tasks/${taskId}`, {title: payload.title})
     },
-    deleteTask (todolistId: string, taskId: string) {
-        return instance.delete<ResponseType>( `/todo-lists/${todolistId}/tasks/${taskId}`)
+    deleteTask(todolistId: string, taskId: string) {
+        return instance.delete<ResponseType>(`/todo-lists/${todolistId}/tasks/${taskId}`)
     }
 }
 

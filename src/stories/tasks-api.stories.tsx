@@ -25,6 +25,7 @@ export const GetTasks = () => {
             <div>
                 {state == null && error == null
                     ? 'Waiting'
+                    //@ts-ignore
                     : state.data.items.map(el => {
                         return (
                             <div>
