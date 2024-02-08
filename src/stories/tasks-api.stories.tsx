@@ -1,137 +1,144 @@
 import {useState} from "react";
-import {tasksAPI} from "../api/tasks-api";
+import {tasksAPI, TaskType} from "../api/tasks-api";
 
 export default {
     title: 'TasksAPI'
 }
 
 export const GetTasks = () => {
-    const [todolistId, setTodolistId] = useState('')
-    const [state, setState] = useState<any>(null)
-    const [error, setError] = useState<any>(null)
+    const [todolistId, setTodolistId] = useState<string>('')
+    const [state, setState] = useState<TaskType[]>([])
     const onClickHandler = () => {
         tasksAPI.getTasks(todolistId)
-            .then(res => setState(res))
-            .catch(res => setError(res))
+            .then(resolve => setState(resolve.data.items))
     }
-
     return (
         <div>
-            <div>
-                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
-                <button onClick={onClickHandler}>Get Tasks of Todolist</button>
-                <div>number of tasks: {state == null ? "we don't know yet" : state.data.items.length}</div>
-            </div>
-            <div>
-                {state == null && error == null
-                    ? 'Waiting'
-                    //@ts-ignore
-                    : state.data.items.map(el => {
-                        return (
-                            <div>
-                                <br/>
-                                <div>title: {el.title}</div>
-                                <div>id: {el.id}</div>
-                                <br/>
-                            </div>
-                        )
-                    })
-                }
-                <div>{error == null ? '' : error.message}</div>
-            </div>
+            <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
+            <button onClick={onClickHandler}>Get Tasks From Todolist</button>
+            {state == null
+                ? <div>no results</div>
+                : state.map(el => {
+                    return <div>
+                        <div>title: {el.title}</div>
+                        <div>status: {el.status}</div>
+                        <div>id: {el.id}</div>
+                        <div>todolistId: {el.todoListId}</div>
+                        <br/>
+                    </div>
+                })}
         </div>
     )
 }
 
 export const CreateTask = () => {
-    const [todolistId, setTodolistId] = useState('')
+    const [todolistId, setTodolistId] = useState<string>('')
+    const [taskTitle, setTaskTitle] = useState<string>('')
     const [state, setState] = useState<any>(null)
-    const [title, setTitle] = useState('')
+    const payload = {
+        title: taskTitle
+    }
     const onClickHandler = () => {
-        const payload = {
-            title: title
-        }
         tasksAPI.createTask(todolistId, payload)
-            .then(res => setState(res))
-            .catch(res => console.log(res))
+            .then(resolve => {
+                setState(resolve.data.messages)
+                console.log(resolve)
+            })
+            .catch(err=>console.log(err))
+        setTaskTitle('')
+    }
+    return (
+        <div>
+            <div>
+                <span>type todolistID:</span>
+                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
+
+            </div>
+            <div>
+                <span>type Task Title: </span>
+                <input type={"text"} value={taskTitle} onChange={(e) => setTaskTitle(e.currentTarget.value)}/>
+
+            </div>
+            <div>
+                <button onClick={onClickHandler}>Create Task In Todolist</button>
+            </div>
+            {state == null
+                ? <div>no results</div>
+                : <div>
+                    <span>Task added: {state.title}</span>
+                </div>}
+        </div>
+    )
+}
+
+export const DeleteTask = () => {
+    const [todolistId, setTodolistId] = useState<string>('')
+    const [taskId, setTaskId] = useState<string>('')
+    const [state, setState] = useState<any>(null)
+    const onClickHandler = () => {
+        tasksAPI.deleteTask(todolistId, taskId)
+            .then(resolve => {
+                console.log(resolve)
+                setState(resolve.data.messages)
+            })
+            .catch(err => {
+                setState(err.message)
+            })
+        setTaskId('')
     }
 
     return (
         <div>
             <div>
-                <span>type TodolistId: </span>
-                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
+                <span>TodolistId: </span>
+                <input type={'text'} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
             </div>
             <div>
-                <span>type Task Title: </span>
-                <input type={"text"} value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
+                <span>TaskId: </span>
+                <input type={'text'} value={taskId} onChange={(e) => setTaskId(e.currentTarget.value)}/>
             </div>
-            <div>
-                <button onClick={onClickHandler}>Add Task for Todolist</button>
-            </div>
+            <button onClick={onClickHandler}>DeleteTask</button>
+            <div>{state}</div>
         </div>
     )
 }
 
-
 export const UpdateTask = () => {
-    const [todolistId, setTodolistId] = useState('')
-    const [taskId, setTaskId] = useState('')
+    const [todolistId, setTodolistId] = useState<string>('')
+    const [taskId, setTaskId] = useState<string>('')
     const [state, setState] = useState<any>(null)
-    const [title, setTitle] = useState('')
+    const [title, setTitle] = useState<string>('')
     const onClickHandler = () => {
         const payload = {
             title: title
         }
         tasksAPI.updateTask(todolistId, taskId, payload)
-            .then(res => setState(res))
-            .catch(res => console.log(res))
+            .then(resolve => {
+                console.log(resolve)
+                setState(resolve.data.messages)
+            })
+            .catch(err => {
+                setState(err.message)
+            })
+        setTitle('')
     }
 
     return (
         <div>
             <div>
-                <span>type TodolistId: </span>
-                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
+                <span>TodolistId: </span>
+                <input type={'text'} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
             </div>
             <div>
-                <span>type TaskId: </span>
-                <input type={"text"} value={taskId} onChange={(e) => setTaskId(e.currentTarget.value)}/>
+                <span>TaskId: </span>
+                <input type={'text'} value={taskId} onChange={(e) => setTaskId(e.currentTarget.value)}/>
             </div>
             <div>
-                <span>type Task New Title: </span>
-                <input type={"text"} value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
+                <span>Task Title: </span>
+                <input type={'text'} value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
             </div>
-            <div>
-                <button onClick={onClickHandler}>Update Task in Todolist</button>
-            </div>
-        </div>
-    )
-}
-export const DeleteTask = () => {
-    const [todolistId, setTodolistId] = useState('')
-    const [taskId, setTaskId] = useState('')
-    const [state, setState] = useState<any>(null)
-    const onClickHandler = () => {
-
-        tasksAPI.deleteTask(todolistId, taskId)
-            .then(res => setState(res))
-            .catch(res => console.log(res))
-    }
-
-    return (
-        <div>
-            <div>
-                <span>type TodolistId: </span>
-                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
-            </div>
-            <div>
-                <span>type TaskId: </span>
-                <input type={"text"} value={taskId} onChange={(e) => setTaskId(e.currentTarget.value)}/>
-            </div>
-            <div>
-                <button onClick={onClickHandler}>Delete Task from Todolist</button>
-            </div>
+            <button onClick={onClickHandler}>Update Task title</button>
+            <div>{state}</div>
         </div>
     )
 }

@@ -1,10 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react';
-import {action} from '@storybook/addon-actions'
-import React, {ChangeEvent, useState} from "react";
-import {Checkbox, IconButton} from "@mui/material";
-import {Delete} from "@mui/icons-material";
+import React, {useState} from "react";
 import {Task} from "./Task";
-import {EditableSpan} from "./EditableSpan";
+import {action} from "@storybook/addon-actions";
+import {TaskPriorities, TaskStatuses} from "./api/tasks-api";
+import {v1} from "uuid";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta: Meta<typeof Task> = {
@@ -18,22 +17,23 @@ const meta: Meta<typeof Task> = {
     tags: ['autodocs'],
     // More on argTypes: https://storybook.js.org/docs/api/argtypes
     argTypes: {
-        removeTask: {
-            description: "Item should be removed",
-            action: 'clicked "remove" button'
+        changeTaskStatus: {
+            description: 'change Task Status',
+            action: 'clicked  \'change Task Status\' '
         },
         changeTaskTitle: {
-            description: "Item's title should be changed",
-            action: 'Item\'s title has been changed'
+            description: 'change Title Status',
+            action: 'clicked \'change Title Status\''
         },
-        changeTaskStatus: {
-            description: "Item's status should be changed",
-            action: 'Item\'s status has been changed'
+        removeTask: {
+            description: ' Task Should be Removed',
+            action: 'clicked \' Task Should be Removed\''
         }
+
     },
+    //это будет общее свойство для всех компонент/историй
     args: {
-        todolistId: 'todolistId_2355232',
-        task: {id: '1', isDone: false, title: 'Task Example 1'}
+        todolistId: '1'
     }
 };
 
@@ -41,40 +41,67 @@ export default meta;
 type Story = StoryObj<typeof Task>;
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Example_1: Story = {};
-export const Example_2: Story = {
+export const Task_Example_1: Story = {
     args: {
-        task: {id: '2', isDone: true, title: 'Task Example 2'}
+        task: {
+            description: 'string',
+            title: "HTML&CSS",
+            completed: false,
+            status: TaskStatuses.New,
+            priority: TaskPriorities.Middle,
+            startDate: new Date(),
+            deadline: new Date(),
+            id: v1(),
+            todoListId: 'todolistId1',
+            order: 0,
+            addedDate: new Date()}
     }
 };
-const LiveTask = () => {
-const [task, setTask] = useState({id: '1', isDone: false, title: 'Live Task Example'})
-    const removeTaskHandler = action('Task should remove')
-
-    const onChangeTaskStatusHandler = (e: ChangeEvent<HTMLInputElement>) => {
-        setTask({...task, isDone: !task.isDone})
+export const Task_Example_2: Story = {
+    args: {
+        task: {
+            description: 'string',
+            title: "React",
+            completed: true,
+            status: TaskStatuses.Completed,
+            priority: TaskPriorities.Middle,
+            startDate: new Date(),
+            deadline: new Date(),
+            id: v1(),
+            todoListId: 'todolistId1',
+            order: 1,
+            addedDate: new Date()
+        }
     }
-    const onTitleChangeHandler = (newValue: string) => {
-        setTask({...task, title: newValue})
-    }
+};
+
+const TaskToggle = () => {
+    const [task, setTask] = useState({
+        description: 'string',
+        title: "TaskTitle",
+        completed: true,
+        status: TaskStatuses.Completed,
+        priority: TaskPriorities.Middle,
+        startDate: new Date(),
+        deadline: new Date(),
+        id: v1(),
+        todoListId: 'todolistId1',
+        order: 1,
+        addedDate: new Date()
+    })
+    const changeTaskStatus = () => setTask({...task, status: task.status==TaskStatuses.New? TaskStatuses.Completed : TaskStatuses.New})
+    const changeTaskTitle = (todolistId: string, taskId: string, newTitle: string) => setTask({...task, title: newTitle})
 
 
-    return (
-        <div key={task.id} className={task.isDone ? "is-done" : ""}>
-            <Checkbox
-                checked={task.isDone}
-                color="primary"
-                onChange={onChangeTaskStatusHandler}
-            />
 
-            <EditableSpan value={task.title} onChange={onTitleChangeHandler}/>
-            <IconButton onClick={removeTaskHandler}>
-                <Delete/>
-            </IconButton>
-        </div>
-    );
+    return <Task
+        task={task}
+        changeTaskStatus={changeTaskStatus}
+        changeTaskTitle={changeTaskTitle}
+        removeTask={action(' Remove Task') }
+        todolistId={'12121212'}/>
 }
-export const LiveExample: Story = {
-    render: () => <LiveTask/>
-}
 
+export const TaskToggleStory: Story = {
+    render: ()=><TaskToggle />
+}

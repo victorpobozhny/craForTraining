@@ -1,11 +1,13 @@
+import React, {ChangeEvent, KeyboardEvent, memo, useState} from 'react';
 import {IconButton, TextField} from "@mui/material";
 import {AddBox} from "@mui/icons-material";
-import {ChangeEvent, KeyboardEvent, memo, useState} from "react";
 
-type AddItemFormPropsType = {
+export type AddItemFormPropsType = {
     addItem: (title: string) => void
 }
-
+//HOC - функция которая приняла компонент и выдала нам новый, который следит за входящими пропсами
+// 2 параметра 1 обязательный, второй не обязательный
+// 1 - компонент, который принимаем
 export const AddItemForm = memo((props: AddItemFormPropsType) => {
 
     let [title, setTitle] = useState("")
@@ -43,7 +45,7 @@ export const AddItemForm = memo((props: AddItemFormPropsType) => {
                    helperText={error}
         />
         <IconButton color="primary" onClick={addItem}>
-            <AddBox/>
+            <AddBox />
         </IconButton>
     </div>
 })

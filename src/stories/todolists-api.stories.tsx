@@ -1,125 +1,120 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {todolistAPI, TodolistType} from "../api/todolist-api";
+import {buttonClasses} from "@mui/material";
 
 export default {
-    title: 'API'
+    title: 'TodolistsAPI'
 }
-export const GetTodolists = () => {
-    const [state, setState] = useState<TodolistType[] | null>(null)
-    const onClickHandler = () => {
-        todolistAPI.getTodolists()
-            .then(res => setState(res.data))
-    }
 
+export const GetTodolists = () => {
+    console.log('GET')
+    const [state, setState] = useState<null | TodolistType[]>(null)
+    useEffect(() => {
+        todolistAPI.getTodos()
+            .then((response) => {
+                setState(response.data)
+            })
+        // здесь мы будем делать запрос и ответ закидывать в стейт.
+        // который в виде строки будем отображать в div-ке
+
+    }, [])
     return (
         <div>
-            <button onClick={onClickHandler}>Get Todolists</button>
             <div>
-                <div>Number of Todolists: {state == null ? 0 : state.length}</div>
-                <br/>
-                {state == null
-                    ? 'Click the button to get Todolists'
-                    : state.map(el => {
-                        return (
-                            <div>
-                                <div>todolistId: {el.id}</div>
-                                <div>title: {el.title}</div>
-                                <div>addedDate: {el.addedDate.toString()}</div>
-                                <div>order: {el.order}</div>
-                                <br/>
-                            </div>)
-                    })}
+                number of todolists: {state == null ? 0 : state.length}
             </div>
+            <br/>
+            {state == null ? <div>{JSON.stringify(state)}</div> : state.map(el => <div>{JSON.stringify(el)}</div>)}
         </div>)
 }
-
-export const CreateTodolists = () => {
-    const [state, setState] = useState<TodolistType | null>(null)
-    const [title, setTitle] = useState('')
-    const onClickHandler = () => {
+export const CreateTodolist = () => {
+    const [state, setState] = useState<any>(null)
+    const [title, setTitle] = useState<string>('')
+    // useEffect(() => {
+    //     const payload = {
+    //         title: 'My first todolist'
+    //     }
+    //     todolistAPI.createTodos(payload)
+    //         .then((response) => {
+    //             setState(response.data.messages)
+    //         })
+    // }, [])
+    //
+    // return <div>{JSON.stringify(state)}</div>
+    const addTodolist = () => {
         const payload = {
             title: title
         }
-        todolistAPI.createTodolist(payload)
-            .then(res => setState(res.data.data.item))
-            .catch(err => console.log(err))
+        todolistAPI.createTodos(payload)
+            .then((response) => {
+                setState(response.data.messages)
+            })
         setTitle('')
     }
-
     return (
         <div>
-            <input type={"text"} value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
-            <button onClick={onClickHandler}>Create Todolist</button>
-            <div>
-                {state == null
-                    ? <div>Click the button to create Todolist<br/></div>
-                    : <div>
-                        <div>todolistId: {state.id}</div>
-                        <div>title: {state.title}</div>
-                        <div>addedDate: {state.addedDate.toString()}</div>
-                        <div>order: {state.order}</div>
-                        <br/>
-                    </div>
-                }
-            </div>
+            <input type={"text"} value={title} onChange={(e)=>setTitle(e.currentTarget.value)}/>
+            <button onClick={addTodolist}>Add New Todolist</button>
+            <div>{state == 0 ? 'Success' : state}</div>
         </div>)
 }
-
-export const DeleteTodolists = () => {
+export const DeleteTodolist = () => {
     const [state, setState] = useState<any>(null)
-    const [error, setError] = useState<any>(null)
-    const [todolistId, setTodolistId] = useState('')
-    const onClickHandler = () => {
-        todolistAPI.deleteTodolist(todolistId)
-            .then(res => setState(res.data))
-            .catch(err => setError(err))
+    // useEffect(() => {
+    //     const payload = {todolistId: ''}
+    //     todolistAPI.deleteTodos(payload)
+    //         .then((response) => {
+    //             setState(response.data)
+    //         })
+    // }, [])
+    const [todolistId, setTodolistId] = useState<string>('')
+    const deleteTodolist = () => {
+        const payload = {todolistId: todolistId}
+        todolistAPI.deleteTodos(payload)
+            .then((response) => {
+                setState(response.data)
+                console.log(response)
+            })
         setTodolistId('')
     }
-
     return (
         <div>
-            <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
-            <button onClick={onClickHandler}>Delete Todolist</button>
-            <div>
-                {state == null
-                    ? <div>Click the button to delete Todolist<br/></div>
-                    : <div>
-                        {error == null
-                            ? "it's ok"
-                            : error
-                        }
-                    </div>
-                }
-            </div>
+            <input type={"text"} value={todolistId} onChange={(e)=>setTodolistId(e.currentTarget.value)}/>
+            <button onClick={deleteTodolist}>Delete todolist</button>
+            {JSON.stringify(state)}
         </div>)
 }
+// export const UpdateTodolistTitle = () => {
+//     const [state, setState] = useState<any>(null)
+//     useEffect(() => {
+//         const todolistId = 'c6688781-a6a3-4b3c-bcd4-c9563ecc7091'
+//         todolistAPI.updateTodolist(todolistId, 'newNewTitle')
+//             .then((response) => {
+//                 setState(response.data)
+//             })
+//
+//     }, [])
+//
+//     return <div>{JSON.stringify(state)}</div>
+// }
 
-export const UpdateTodolists = () => {
+export const UpdateTodolistTitle = () => {
     const [state, setState] = useState<any>(null)
-    const [title, setTitle] = useState('')
-    const [todolistId, setTodolistId] = useState('')
-    const onClickHandler = () => {
-        const payload = {
-            title: title
-        }
-        todolistAPI.updateTodolist(todolistId, payload)
-            .then(res => setState(res))
-            .catch(err => console.log(err))
+    const [title, setTitle] = useState<string>('')
+    const updateTodolist = () => {
+        const todolistId = 'c6688781-a6a3-4b3c-bcd4-c9563ecc7091'
+         todolistAPI.updateTodolist(todolistId, title)
+            .then((response) => {
+                setState(response.data)
+            })
         setTitle('')
     }
-
     return (
         <div>
-            <div>
-                <span>TodolistId</span>
-                <input type={"text"} value={todolistId} onChange={(e) => setTodolistId(e.currentTarget.value)}/>
-            </div>
-            <div>
-                <span>New Title For Todolist</span>
-                <input type={"text"} value={title} onChange={(e) => setTitle(e.currentTarget.value)}/>
-                <button onClick={onClickHandler}>Create Todolist</button>
-            </div>
-            <div>{JSON.stringify(state)}</div>
+            <input type={"text"} value={title} onChange={(e)=>setTitle(e.currentTarget.value)}/>
+            <button onClick={updateTodolist}>Update One Todolist title</button>
 
+            {/*<div>{state.messages == 0 ? 'Success' : state.messages}</div>*/}
         </div>)
 }
+
