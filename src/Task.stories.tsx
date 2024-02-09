@@ -17,13 +17,9 @@ const meta: Meta<typeof Task> = {
     tags: ['autodocs'],
     // More on argTypes: https://storybook.js.org/docs/api/argtypes
     argTypes: {
-        changeTaskStatus: {
+        updateTask: {
             description: 'change Task Status',
-            action: 'clicked  \'change Task Status\' '
-        },
-        changeTaskTitle: {
-            description: 'change Title Status',
-            action: 'clicked \'change Title Status\''
+            action: 'clicked  \'change Task Status\'  or changed task title'
         },
         removeTask: {
             description: ' Task Should be Removed',
@@ -54,7 +50,8 @@ export const Task_Example_1: Story = {
             id: v1(),
             todoListId: 'todolistId1',
             order: 0,
-            addedDate: new Date()}
+            addedDate: new Date()
+        }
     }
 };
 export const Task_Example_2: Story = {
@@ -89,19 +86,18 @@ const TaskToggle = () => {
         order: 1,
         addedDate: new Date()
     })
-    const changeTaskStatus = () => setTask({...task, status: task.status==TaskStatuses.New? TaskStatuses.Completed : TaskStatuses.New})
-    const changeTaskTitle = (todolistId: string, taskId: string, newTitle: string) => setTask({...task, title: newTitle})
 
-
+    const updateTask = (taskId: string, todolistId: string, status: TaskStatuses, newTitle: string) => {
+        setTask({...task, status: status, title: newTitle})
+    }
 
     return <Task
         task={task}
-        changeTaskStatus={changeTaskStatus}
-        changeTaskTitle={changeTaskTitle}
-        removeTask={action(' Remove Task') }
+        updateTask={updateTask}
+        removeTask={action(' Remove Task')}
         todolistId={'12121212'}/>
 }
 
 export const TaskToggleStory: Story = {
-    render: ()=><TaskToggle />
+    render: () => <TaskToggle/>
 }
