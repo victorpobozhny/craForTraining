@@ -2,7 +2,7 @@ import {tasksReducer} from './tasks-reducer';
 import {todolistsReducer} from './todolists-reducer';
 import {AnyAction, applyMiddleware, combineReducers, legacy_createStore} from 'redux';
 import {thunk, ThunkDispatch} from 'redux-thunk'
-import {useDispatch} from "react-redux";
+import {TypedUseSelectorHook, useDispatch, useSelector} from "react-redux";
 
 // объединяя reducer-ы с помощью combineReducers,
 // мы задаём структуру нашего единственного объекта-состояния
@@ -20,7 +20,8 @@ export type AppDispatchType = ThunkDispatch<AppRootStateType, unknown, AnyAction
 
 
 //создаем кастомный хук, который сразу типизируем, чтобы каждый раз не указывать тип при вызове базового useDispatch
-export const useAppDispatch = useDispatch < AppDispatchType >
+export const useAppDispatch = useDispatch < AppDispatchType >;
+export const useAppSelector: TypedUseSelectorHook<AppRootStateType> = useSelector
 // а это, чтобы можно было в консоли браузера обращаться к store в любой момент
 // @ts-ignore
 window.store = store;
