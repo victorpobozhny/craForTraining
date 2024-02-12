@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react';
 import React, {useState} from "react";
 import {Task} from "./Task";
 import {action} from "@storybook/addon-actions";
-import {TaskPriorities, TaskStatuses} from "./api/tasks-api";
+import {TaskPriorities, TaskStatuses} from "../../../../api/tasks-api";
 import {v1} from "uuid";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
@@ -50,8 +50,7 @@ export const Task_Example_1: Story = {
             id: v1(),
             todoListId: 'todolistId1',
             order: 0,
-            addedDate: new Date()
-        }
+            addedDate: new Date()}
     }
 };
 export const Task_Example_2: Story = {
@@ -94,10 +93,10 @@ const TaskToggle = () => {
     return <Task
         task={task}
         updateTask={updateTask}
-        removeTask={action(' Remove Task')}
+        removeTask={action(' Remove Task') }
         todolistId={'12121212'}/>
 }
 
 export const TaskToggleStory: Story = {
-    render: () => <TaskToggle/>
+    render: ()=><TaskToggle />
 }

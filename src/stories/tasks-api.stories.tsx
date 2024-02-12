@@ -35,6 +35,7 @@ export const CreateTask = () => {
     const [todolistId, setTodolistId] = useState<string>('')
     const [taskTitle, setTaskTitle] = useState<string>('')
     const [state, setState] = useState<any>(null)
+
     const onClickHandler = () => {
         tasksAPI.createTask(todolistId, taskTitle)
             .then(resolve => {
@@ -111,12 +112,11 @@ export const UpdateTask = () => {
     const [startDate, setStartDate] = useState<Date>(new Date)
     const [deadline, setDeadline] = useState<Date>(new Date)
 
-
     const onClickHandler = () => {
         const model: UpdateTaskModelType = {
-            title, description, status, startDate, priority, deadline
+            description, title, status, deadline, priority, startDate
         }
-        tasksAPI.updateTask(todolistId, taskId, model)
+        tasksAPI.updateTask(todolistId, taskId,model)
             .then(resolve => {
                 setState(resolve.data.messages)
             })
@@ -152,7 +152,7 @@ export const UpdateTask = () => {
                 <span>Task Priority: </span>
                 <input type={'number'} value={priority} onChange={(e) => setPriority(+e.currentTarget.value)}/>
             </div>
-            <button onClick={onClickHandler}>Update Task</button>
+            <button onClick={onClickHandler}>Update Task title</button>
             <div>{state}</div>
         </div>
     )
