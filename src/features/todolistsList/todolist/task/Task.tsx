@@ -10,7 +10,7 @@ type TaskPropsType = {
     task: TaskType
     todolistId: string
     removeTask: (taskId: string, todolistId: string) => void
-    updateTask: (taskId: string, todolistId: string, status: TaskStatuses, title: string) => void
+    updateTask: (todolistId: string, task: TaskType) => void
 }
 
 export const Task = memo((props: TaskPropsType) => {
@@ -18,10 +18,10 @@ export const Task = memo((props: TaskPropsType) => {
     const changeTaskStatus = (e: ChangeEvent<HTMLInputElement>) => {
         //--------------------проверить на корректность отправляемого значения----------------------------------
         let newIsDoneValue = e.currentTarget.checked ? TaskStatuses.Completed : TaskStatuses.New;
-        props.updateTask(props.task.id, props.todolistId, newIsDoneValue, props.task.title);
+        props.updateTask(props.todolistId, {...props.task, status: newIsDoneValue});
     }
     const changeTaskTitle = (title: string) => {
-        props.updateTask(props.task.id, props.todolistId, props.task.status, title)
+        props.updateTask(props.todolistId, {...props.task, title: title})
     }
     const removeTask = () => {
         props.removeTask(props.task.id, props.todolistId)

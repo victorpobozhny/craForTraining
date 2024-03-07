@@ -147,8 +147,20 @@ test('correct task should be added to correct array', () => {
 })
 
 test('status of specified task should be changed', () => {
-
-    const action = updateTaskAC("todolistId2", "2", TaskStatuses.Completed, 'title');
+    const newTask: TaskType = {
+        description: '',
+        title: 'new Task',
+        completed: false,
+        status: TaskStatuses.Completed,
+        priority: TaskPriorities.Middle,
+        startDate: new Date,
+        deadline: new Date,
+        id: 'new TaskID',
+        todoListId: 'todolistId2',
+        order: 0,
+        addedDate: new Date
+    }
+    const action = updateTaskAC("todolistId2", newTask);
 
     const endState = tasksReducer(startState, action)
 
@@ -158,8 +170,20 @@ test('status of specified task should be changed', () => {
 });
 
 test('title of specified task should be changed', () => {
-
-    const action = updateTaskAC("todolistId2", "2", TaskStatuses.New, 'newTitle');
+    const newTask: TaskType = {
+        description: '',
+        title: 'React Book',
+        completed: false,
+        status: TaskStatuses.New,
+        priority: TaskPriorities.Middle,
+        startDate: new Date,
+        deadline: new Date,
+        id: 'new TaskID',
+        todoListId: 'todolistId2',
+        order: 0,
+        addedDate: new Date
+    }
+    const action = updateTaskAC("todolistId2", newTask);
     const endState = tasksReducer(startState, action)
     expect(endState['todolistId2'][1].title).toBe('newTitle');
     expect(startState['todolistId2'][1].title).toBe("React Book");
