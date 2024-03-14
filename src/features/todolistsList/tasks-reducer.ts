@@ -1,6 +1,8 @@
 import {tasksAPI, TaskType} from "../../api/tasks-api";
 import {AppThunk} from "../../app/store";
 import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistActionType} from "./todolists-reducer";
+import {setAppError, setAppStatus} from "../../app/app-reducer";
+import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
 
 
 //--------------TYPES--------------
@@ -79,37 +81,59 @@ export const updateTaskAC = (todolistId: string, task: TaskType) => ({
 
 //----------------THUNK CREATORS---------------------------------------
 
-export const getTasksTC = (todolistId: string): AppThunk => async dispatch => {
-    try {
-        const res = await tasksAPI.getTasks(todolistId)
-        dispatch(setTasksAC(todolistId, res.data.items))
-    } catch (e) {
-        console.log(e)
-    }
+export const getTasksTC = (todolistId: string): AppThunk => dispatch => {
+    dispatch(setAppStatus('loading'))
+    tasksAPI.getTasks(todolistId)
+        .then(res => {
+            dispatch(setTasksAC(todolistId, res.data.items))
+            dispatch(setAppStatus('succeeded'))
+        })
+        .catch(e => console.log(e))
 }
 
-export const createTaskTC = (todolistId: string, title: string): AppThunk => async dispatch => {
-    try {
-        const res = await tasksAPI.createTask(todolistId, title)
-        dispatch(createTaskAC(todolistId, res.data.data.item))
-    } catch (e) {
-        console.log(e)
-    }
+export const createTaskTC = (todolistId: string, title: string): AppThunk => dispatch => {
+    dispatch(setAppStatus('loading'))
+    tasksAPI.createTask(todolistId, title)
+        .then(res => {
+            if (res.data.resultCode === 0) {
+                dispatch(createTaskAC(todolistId, res.data.data.item))
+                dispatch(setAppStatus('succeeded'))
+            } else {
+                //handleServerAppError(res.data, dispatch)
+            }
+        })
+        .catch(error => {
+            handleServerNetworkError(error, dispatch)
+        })
+
+
 }
 
-export const removeTaskTC = (todolistId: string, taskId: string): AppThunk => async dispatch => {
-    try {
-        const res = await tasksAPI.deleteTask(todolistId, taskId)
-        dispatch(removeTaskAC(taskId, todolistId))
-    } catch (e) {
-        console.log(e)
-    }
+export const removeTaskTC = (todolistId: string, taskId: string): AppThunk => dispatch => {
+    dispatch(setAppStatus('loading'))
+    tasksAPI.deleteTask(todolistId, taskId)
+        .then(res => {
+            dispatch(removeTaskAC(taskId, todolistId))
+            dispatch(setAppStatus('succeeded'))
+        })
+        .catch(e => console.log(e))
 }
 
 export const updateTaskTC = (todolistId: string, task: TaskType): AppThunk =>
     dispatch => {
+        dispatch(setAppStatus('loading'))
         tasksAPI.updateTask(todolistId, task.id, task)
-            .then(res=>dispatch(updateTaskAC(todolistId, res.data.data.item)))
+            .then(res => {
+                if (res.data.resultCode === 0) {
+                    dispatch(updateTaskAC(todolistId, res.data.data.item))
+                    dispatch(setAppStatus('succeeded'))
+                } else {
+                    //handleServerAppError<{ item: TaskType }>(res.data, dispatch)
+                }
+            })
+            .catch(error => {
+                handleServerNetworkError(error, dispatch)
+            })
     }
 
 

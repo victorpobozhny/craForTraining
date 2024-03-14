@@ -11,7 +11,8 @@ import {
 } from "./todolists-reducer";
 import {createTaskTC, removeTaskTC, TasksStateType, updateTaskTC} from "./tasks-reducer";
 import {TaskStatuses, TaskType} from "../../api/tasks-api";
-import {Grid, Paper} from "@mui/material";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
 import {AddItemForm} from "../../components/additemForm/AddItemForm";
 import {Todolist} from "./todolist/Todolist";
 
@@ -19,7 +20,6 @@ export const TodolistsList: React.FC = () => {
     let todolists = useAppSelector<TodolistDomainType[]>(state => state.todolists)
     let tasks = useAppSelector<TasksStateType>(state => state.tasks)
     const dispatch = useAppDispatch()
-
 
     useEffect(() => {
         dispatch(getTodolistsTC())
@@ -74,6 +74,7 @@ export const TodolistsList: React.FC = () => {
                                     updateTask={updateTask}
                                     removeTodolist={removeTodolist}
                                     changeTodolistTitle={changeTodolistTitle}
+                                    entityStatus={tl.entityStatus}
                                 />
                             </Paper>
                         </Grid>)

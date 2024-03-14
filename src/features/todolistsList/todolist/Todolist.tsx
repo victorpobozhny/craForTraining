@@ -9,6 +9,7 @@ import {FilterValuesType} from "../todolists-reducer";
 import {Task} from "./task/Task";
 import {useAppDispatch} from "../../../app/store";
 import {getTasksTC} from "../tasks-reducer";
+import {RequestStatusType} from "../../../app/app-reducer";
 
 type PropsType = {
     id: string
@@ -23,6 +24,7 @@ type PropsType = {
     removeTodolist: (id: string) => void
     changeTodolistTitle: (id: string, newTitle: string) => void
     filter: FilterValuesType
+    entityStatus: RequestStatusType
 }
 
 export const Todolist = memo((props: PropsType) => {
@@ -62,11 +64,11 @@ const dispatch = useAppDispatch()
 
     return <div>
         <h3><EditableSpan value={props.title} onChange={changeTodolistTitle}/>
-            <IconButton onClick={removeTodolist}>
+            <IconButton disabled={props.entityStatus==='loading'}  onClick={removeTodolist}>
                 <Delete/>
             </IconButton>
         </h3>
-        <AddItemForm addItem={addTask}/>
+        <AddItemForm addItem={addTask} disabled={props.entityStatus === 'loading'}/>
         <div>
             {
                 tasks.map(t => {
