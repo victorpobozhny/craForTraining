@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {tasksAPI, TaskType, UpdateTaskModelType} from "../api/tasks-api";
+import {TaskType, todolistAPI, UpdateTaskModelType} from "../api/todolist-api";
 
 export default {
     title: 'TasksAPI'
@@ -9,7 +9,7 @@ export const GetTasks = () => {
     const [todolistId, setTodolistId] = useState<string>('')
     const [state, setState] = useState<TaskType[]>([])
     const onClickHandler = () => {
-        tasksAPI.getTasks(todolistId)
+        todolistAPI.getTasks(todolistId)
             .then(resolve => setState(resolve.data.items))
     }
     return (
@@ -37,7 +37,7 @@ export const CreateTask = () => {
     const [state, setState] = useState<any>(null)
 
     const onClickHandler = () => {
-        tasksAPI.createTask(todolistId, taskTitle)
+        todolistAPI.createTask(todolistId, taskTitle)
             .then(resolve => {
                 setState(resolve.data.messages)
                 console.log(resolve)
@@ -74,7 +74,7 @@ export const DeleteTask = () => {
     const [taskId, setTaskId] = useState<string>('')
     const [state, setState] = useState<any>(null)
     const onClickHandler = () => {
-        tasksAPI.deleteTask(todolistId, taskId)
+        todolistAPI.deleteTask(todolistId, taskId)
             .then(resolve => {
                 console.log(resolve)
                 setState(resolve.data.messages)
@@ -116,7 +116,7 @@ export const UpdateTask = () => {
         const model: UpdateTaskModelType = {
             description, title, status, deadline, priority, startDate
         }
-        tasksAPI.updateTask(todolistId, taskId,model)
+        todolistAPI.updateTask(todolistId, taskId,model)
             .then(resolve => {
                 setState(resolve.data.messages)
             })

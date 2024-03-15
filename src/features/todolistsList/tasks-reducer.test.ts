@@ -1,8 +1,6 @@
-import {createTaskAC, removeTaskAC, tasksReducer, TasksStateType, updateTaskAC} from './tasks-reducer';
+import {createTaskAC, removeTaskAC, TaskDomainType, tasksReducer, TasksStateType, updateTaskAC} from './tasks-reducer';
 import {addTodolistAC, removeTodolistAC} from "./todolists-reducer";
-
-import {TaskPriorities, TaskStatuses, TaskType} from "../../api/tasks-api";
-import {TodolistType} from "../../api/todolist-api";
+import {TaskPriorities, TaskStatuses, TaskType, TodolistType} from "../../api/todolist-api";
 
 let startState: TasksStateType
 const date = new Date()
@@ -21,7 +19,8 @@ beforeEach(() => {
                 id: '1',
                 todoListId: 'todolistId1',
                 order: 0,
-                addedDate: date
+                addedDate: date,
+                entityStatus: 'idle'
             },
             {
                 description: 'string1',
@@ -34,7 +33,8 @@ beforeEach(() => {
                 id: '2',
                 todoListId: 'todolistId1',
                 order: 1,
-                addedDate: date
+                addedDate: date,
+                entityStatus: 'idle'
             }
         ],
         "todolistId2": [
@@ -49,7 +49,8 @@ beforeEach(() => {
                 id: '1',
                 todoListId: 'todolistId2',
                 order: 1,
-                addedDate: date
+                addedDate: date,
+                entityStatus: 'idle'
             },
             {
                 description: 'string3',
@@ -62,7 +63,8 @@ beforeEach(() => {
                 id: '2',
                 todoListId: 'todolistId2',
                 order: 2,
-                addedDate: date
+                addedDate: date,
+                entityStatus: 'idle'
             }
         ]
     };
@@ -147,7 +149,7 @@ test('correct task should be added to correct array', () => {
 })
 
 test('status of specified task should be changed', () => {
-    const newTask: TaskType = {
+    const newTask: TaskDomainType = {
         description: '',
         title: 'new Task',
         completed: false,
@@ -158,7 +160,8 @@ test('status of specified task should be changed', () => {
         id: 'new TaskID',
         todoListId: 'todolistId2',
         order: 0,
-        addedDate: new Date
+        addedDate: new Date,
+        entityStatus: 'idle'
     }
     const action = updateTaskAC("todolistId2", newTask);
 
@@ -170,7 +173,7 @@ test('status of specified task should be changed', () => {
 });
 
 test('title of specified task should be changed', () => {
-    const newTask: TaskType = {
+    const newTask: TaskDomainType = {
         description: '',
         title: 'React Book',
         completed: false,
@@ -181,7 +184,8 @@ test('title of specified task should be changed', () => {
         id: 'new TaskID',
         todoListId: 'todolistId2',
         order: 0,
-        addedDate: new Date
+        addedDate: new Date,
+        entityStatus: 'idle'
     }
     const action = updateTaskAC("todolistId2", newTask);
     const endState = tasksReducer(startState, action)

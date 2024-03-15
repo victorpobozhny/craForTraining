@@ -1,19 +1,25 @@
-import {tasksAPI, TaskType} from "../../api/tasks-api";
 import {AppThunk} from "../../app/store";
 import {AddTodolistActionType, RemoveTodolistActionType, SetTodolistActionType} from "./todolists-reducer";
-import {setAppError, setAppStatus} from "../../app/app-reducer";
-import {handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
+import {RequestStatusType, setAppError, setAppStatus} from "../../app/app-reducer";
+import {ErrorType, handleServerAppError, handleServerNetworkError} from "../../utils/error-utils";
+import {TaskType, todolistAPI} from "../../api/todolist-api";
+import {AxiosError} from "axios";
 
 
 //--------------TYPES--------------
 export type TasksStateType = {
-    [key: string]: Array<TaskType>
+    [key: string]: Array<TaskDomainType>
+}
+
+export type TaskDomainType = TaskType & {
+    entityStatus: RequestStatusType
 }
 export type TasksActionsType =
     ReturnType<typeof createTaskAC>
     | ReturnType<typeof removeTaskAC>
     | ReturnType<typeof setTasksAC>
     | ReturnType<typeof updateTaskAC>
+    | ReturnType<typeof changeTaskEntityStatus>
     | SetTodolistActionType | RemoveTodolistActionType | AddTodolistActionType
 
 
@@ -23,10 +29,10 @@ export const tasksReducer = (state: TasksStateType = initialState, action: Tasks
     const {type, payload} = action
     switch (type) {
         case "SET-TASKS":
-            return {...state, [payload.todolistId]: payload.tasks}
+            return {...state, [payload.todolistId]: payload.tasks.map(el => ({...el, entityStatus: 'idle'}))}
         case "CREATE-TASK":
             return {
-                ...state, [payload.todolistId]: [...state[payload.todolistId], payload.task]
+                ...state, [payload.todolistId]: [...state[payload.todolistId], {...payload.task, entityStatus: 'idle'}]
             }
         case "REMOVE-TASK":
             const {taskID, todolistID} = payload
@@ -46,6 +52,14 @@ export const tasksReducer = (state: TasksStateType = initialState, action: Tasks
             const newState = {...state}
             delete newState[payload.id]
             return newState
+        case "TASKS/CHANGE-ENTITY-STATUS": {
+            return {...state,
+                [action.payload.todolistId]: state[action.payload.todolistId].map(el => el.id === action.payload.taskId ? {
+                    ...el,
+                    entityStatus: action.payload.status
+                } : el)
+            }
+        }
         default:
             return state
     }
@@ -71,7 +85,7 @@ export const removeTaskAC = (taskID: string, todolistID: string) => ({
     type: 'REMOVE-TASK',
     payload: {taskID, todolistID}
 } as const)
-export const updateTaskAC = (todolistId: string, task: TaskType) => ({
+export const updateTaskAC = (todolistId: string, task: TaskDomainType) => ({
     type: "UPDATE-TASK",
     payload: {
         todolistId, task
@@ -79,30 +93,46 @@ export const updateTaskAC = (todolistId: string, task: TaskType) => ({
 } as const)
 
 
+export const changeTaskEntityStatus = (todolistId: string, taskId: string, status: RequestStatusType) => {
+    return {
+        type: 'TASKS/CHANGE-ENTITY-STATUS',
+        payload: {
+            todolistId, taskId, status
+        }
+    } as const
+}
+
+
 //----------------THUNK CREATORS---------------------------------------
 
 export const getTasksTC = (todolistId: string): AppThunk => dispatch => {
     dispatch(setAppStatus('loading'))
-    tasksAPI.getTasks(todolistId)
+    todolistAPI.getTasks(todolistId)
         .then(res => {
-            dispatch(setTasksAC(todolistId, res.data.items))
-            dispatch(setAppStatus('succeeded'))
+            if (!res.data.error) {
+                dispatch(setTasksAC(todolistId, res.data.items))
+                dispatch(setAppStatus('succeeded'))
+            } else {
+                dispatch(setAppError(res.data.error.error))
+            }
         })
-        .catch(e => console.log(e))
+        .catch((error: AxiosError<ErrorType>) => {
+            handleServerNetworkError(error, dispatch)
+        })
 }
 
 export const createTaskTC = (todolistId: string, title: string): AppThunk => dispatch => {
     dispatch(setAppStatus('loading'))
-    tasksAPI.createTask(todolistId, title)
+    todolistAPI.createTask(todolistId, title)
         .then(res => {
             if (res.data.resultCode === 0) {
                 dispatch(createTaskAC(todolistId, res.data.data.item))
                 dispatch(setAppStatus('succeeded'))
             } else {
-                //handleServerAppError(res.data, dispatch)
+                handleServerAppError<{ item: TaskType }>(res.data, dispatch)
             }
         })
-        .catch(error => {
+        .catch((error: AxiosError<ErrorType>) => {
             handleServerNetworkError(error, dispatch)
         })
 
@@ -111,28 +141,43 @@ export const createTaskTC = (todolistId: string, title: string): AppThunk => dis
 
 export const removeTaskTC = (todolistId: string, taskId: string): AppThunk => dispatch => {
     dispatch(setAppStatus('loading'))
-    tasksAPI.deleteTask(todolistId, taskId)
+    dispatch(changeTaskEntityStatus(todolistId, taskId, 'loading'))
+    todolistAPI.deleteTask(todolistId, taskId)
         .then(res => {
-            dispatch(removeTaskAC(taskId, todolistId))
-            dispatch(setAppStatus('succeeded'))
+            if(res.data.resultCode===0) {
+                dispatch(removeTaskAC(taskId, todolistId))
+                dispatch(setAppStatus('succeeded'))
+                dispatch(changeTaskEntityStatus(todolistId, taskId, 'succeeded'))
+            } else {
+                handleServerAppError(res.data, dispatch)
+                dispatch(changeTaskEntityStatus(todolistId, taskId, 'failed'))
+            }
+
         })
-        .catch(e => console.log(e))
+        .catch((error: AxiosError<ErrorType>) => {
+            handleServerNetworkError(error, dispatch)
+            dispatch(changeTaskEntityStatus(todolistId, taskId, 'failed'))
+        })
 }
 
-export const updateTaskTC = (todolistId: string, task: TaskType): AppThunk =>
+export const updateTaskTC = (todolistId: string, task: TaskDomainType): AppThunk =>
     dispatch => {
         dispatch(setAppStatus('loading'))
-        tasksAPI.updateTask(todolistId, task.id, task)
+        dispatch(changeTaskEntityStatus(todolistId, task.id, 'loading'))
+        todolistAPI.updateTask(todolistId, task.id, task)
             .then(res => {
                 if (res.data.resultCode === 0) {
-                    dispatch(updateTaskAC(todolistId, res.data.data.item))
+                    dispatch(updateTaskAC(todolistId, {...res.data.data.item, entityStatus: "idle"}))
                     dispatch(setAppStatus('succeeded'))
+                    dispatch(changeTaskEntityStatus(todolistId, task.id, 'succeeded'))
                 } else {
-                    //handleServerAppError<{ item: TaskType }>(res.data, dispatch)
+                    handleServerAppError<{ item: TaskType }>(res.data, dispatch)
+                    dispatch(changeTaskEntityStatus(todolistId, task.id, 'failed'))
                 }
             })
             .catch(error => {
                 handleServerNetworkError(error, dispatch)
+                dispatch(changeTaskEntityStatus(todolistId, task.id, 'failed'))
             })
     }
 

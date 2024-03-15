@@ -4,20 +4,20 @@ import {EditableSpan} from '../../../components/editableSpan/EditableSpan';
 import IconButton from '@mui/material/IconButton/IconButton';
 import {Delete} from "@mui/icons-material";
 import {Button} from "@mui/material";
-import {TaskStatuses, TaskType} from "../../../api/tasks-api";
 import {FilterValuesType} from "../todolists-reducer";
 import {Task} from "./task/Task";
 import {useAppDispatch} from "../../../app/store";
-import {getTasksTC} from "../tasks-reducer";
+import {getTasksTC, TaskDomainType} from "../tasks-reducer";
 import {RequestStatusType} from "../../../app/app-reducer";
+import {TaskStatuses} from "../../../api/todolist-api";
 
 type PropsType = {
     id: string
     title: string
-    tasks: Array<TaskType>
+    tasks: Array<TaskDomainType>
     //task
     removeTask: (taskId: string, todolistId: string) => void
-    updateTask: (todolistId: string, task: TaskType)=>void
+    updateTask: (todolistId: string, task: TaskDomainType) => void
     //todolist
     changeFilter: (value: FilterValuesType, todolistId: string) => void
     addTask: (title: string, todolistId: string) => void
@@ -28,8 +28,8 @@ type PropsType = {
 }
 
 export const Todolist = memo((props: PropsType) => {
-const dispatch = useAppDispatch()
-    useEffect(()=>{
+    const dispatch = useAppDispatch()
+    useEffect(() => {
         dispatch(getTasksTC(props.id))
     }, [])
 
@@ -53,18 +53,22 @@ const dispatch = useAppDispatch()
     let tasks = props.tasks;
     useMemo(() => {
         if (props.filter === "active") {
-            tasks = tasks.filter(t => {return t.status==TaskStatuses.New});
+            tasks = tasks.filter(t => {
+                return t.status == TaskStatuses.New
+            });
         }
         if (props.filter === "completed") {
-            tasks = tasks.filter(t => {return t.status==TaskStatuses.Completed});
+            tasks = tasks.filter(t => {
+                return t.status == TaskStatuses.Completed
+            });
         }
         return tasks
     }, [props.filter, props.tasks])
 
 
     return <div>
-        <h3><EditableSpan value={props.title} onChange={changeTodolistTitle}/>
-            <IconButton disabled={props.entityStatus==='loading'}  onClick={removeTodolist}>
+        <h3><EditableSpan value={props.title} onChange={changeTodolistTitle} disabled={props.entityStatus==='loading'}/>
+            <IconButton disabled={props.entityStatus === 'loading'} onClick={removeTodolist}>
                 <Delete/>
             </IconButton>
         </h3>

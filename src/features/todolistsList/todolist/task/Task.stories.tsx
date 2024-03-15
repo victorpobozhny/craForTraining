@@ -2,8 +2,9 @@ import type {Meta, StoryObj} from '@storybook/react';
 import React, {useState} from "react";
 import {Task} from "./Task";
 import {action} from "@storybook/addon-actions";
-import {TaskPriorities, TaskStatuses, TaskType} from "../../../../api/tasks-api";
 import {v1} from "uuid";
+import {TaskPriorities, TaskStatuses} from "../../../../api/todolist-api";
+import {TaskDomainType} from "../../tasks-reducer";
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
 const meta: Meta<typeof Task> = {
@@ -50,7 +51,9 @@ export const Task_Example_1: Story = {
             id: v1(),
             todoListId: 'todolistId1',
             order: 0,
-            addedDate: new Date()}
+            addedDate: new Date(),
+            entityStatus: "idle"
+        }
     }
 };
 export const Task_Example_2: Story = {
@@ -66,13 +69,14 @@ export const Task_Example_2: Story = {
             id: v1(),
             todoListId: 'todolistId1',
             order: 1,
-            addedDate: new Date()
+            addedDate: new Date(),
+            entityStatus: "idle"
         }
     }
 };
 
 const TaskToggle = () => {
-    const [task, setTask] = useState({
+    const [task, setTask] = useState<TaskDomainType>({
         description: 'string',
         title: "TaskTitle",
         completed: true,
@@ -83,20 +87,21 @@ const TaskToggle = () => {
         id: v1(),
         todoListId: 'todolistId1',
         order: 1,
-        addedDate: new Date()
+        addedDate: new Date(),
+        entityStatus: "idle"
     })
 
-    const updateTask = (todolistId: string, task: TaskType) => {
+    const updateTask = (todolistId: string, task: TaskDomainType) => {
         setTask({...task})
     }
 
     return <Task
         task={task}
         updateTask={updateTask}
-        removeTask={action('Remove Task') }
+        removeTask={action('Remove Task')}
         todolistId={'12121212'}/>
 }
 
 export const TaskToggleStory: Story = {
-    render: ()=><TaskToggle />
+    render: () => <TaskToggle/>
 }

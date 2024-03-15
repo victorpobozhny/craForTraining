@@ -9,12 +9,12 @@ import {
     TodolistDomainType,
     updateTodolistTC
 } from "./todolists-reducer";
-import {createTaskTC, removeTaskTC, TasksStateType, updateTaskTC} from "./tasks-reducer";
-import {TaskStatuses, TaskType} from "../../api/tasks-api";
+import {createTaskTC, removeTaskTC, TaskDomainType, TasksStateType, updateTaskTC} from "./tasks-reducer";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import {AddItemForm} from "../../components/additemForm/AddItemForm";
 import {Todolist} from "./todolist/Todolist";
+import {TaskType} from "../../api/todolist-api";
 
 export const TodolistsList: React.FC = () => {
     let todolists = useAppSelector<TodolistDomainType[]>(state => state.todolists)
@@ -33,7 +33,7 @@ export const TodolistsList: React.FC = () => {
         dispatch(createTaskTC(todolistId, title))
     }, [dispatch])
 
-    const updateTask = useCallback((todolistId: string, task: TaskType) => {
+    const updateTask = useCallback((todolistId: string, task: TaskDomainType) => {
         dispatch(updateTaskTC(todolistId, task))
     }, [dispatch])
 
