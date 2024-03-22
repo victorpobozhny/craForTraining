@@ -11,6 +11,8 @@ import Menu from "@mui/icons-material/Menu";
 import {TodolistsList} from "../features/todolistsList/TodolistsList";
 import {useAppSelector} from "./store";
 import {ErrorSnackbar} from "../components/ErrorSnackbar/ErrorSnackbar";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import {Login} from "../features/Login/Login";
 
 
 function App() {
@@ -30,10 +32,17 @@ const status = useAppSelector(state=>state.app.status)
                     </Typography>
                     <Button color="inherit">Login</Button>
                 </Toolbar>
-                {status=='loading' && <LinearProgress />}
+                {status==='loading' && <LinearProgress />}
             </AppBar>
             <Container fixed>
-                <TodolistsList/>
+                <Routes>
+                    <Route path={'/'} element={<TodolistsList/>}/>
+                    <Route path={'/login'} element={<Login/>}/>
+
+                    <Route path={"/404"} element={<h1>404: PAGE NOT FOUND</h1>} />
+                    <Route path={'*'} element={<Navigate to={'404'}/>} />
+                </Routes>
+
             </Container>
         </div>
     );
