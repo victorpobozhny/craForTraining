@@ -30,7 +30,7 @@ type PropsType = {
 export const Todolist = memo((props: PropsType) => {
     const dispatch = useAppDispatch()
     useEffect(() => {
-        dispatch(getTasksTC(props.id))
+        //dispatch(getTasksTC(props.id))
     }, [])
 
 
