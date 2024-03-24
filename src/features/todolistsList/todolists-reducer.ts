@@ -99,7 +99,11 @@ export const getTodolistsTC = (): AppThunk => dispatch => {
             dispatch(setTodolistsAC(res.data))
             dispatch(setAppStatus('succeeded'))
         })
-        .catch(e => console.log(e))
+        .catch((e)=>{
+            if(axios.isAxiosError(e)) {
+                handleServerNetworkError({message: e.response!.data.message},dispatch)
+            }
+        })
 }
 
 export const addTodolistTC = (title: string): AppThunk => dispatch => {

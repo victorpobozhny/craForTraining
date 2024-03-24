@@ -32,7 +32,32 @@ export const todolistAPI = {
     }
 }
 
+
+
+export const authAPI = {
+    login(data: LoginParamsType){
+        return instance.post<ResponseType<{userId: number}>, AxiosResponse<ResponseType<{userId: number}>>, LoginParamsType>('/auth/login', data )
+    },
+    me() {
+        return instance.get<ResponseType<DataLoginType>, AxiosResponse<ResponseType<DataLoginType>>>('/auth/me')
+    },
+    logout() {
+        return instance.delete('/auth/login')
+    }
+}
+
 //-----------TYPES------------
+
+export type DataLoginType = {
+    id: number
+    email: string
+    login: string
+}
+export type LoginParamsType = {
+    email: string
+    password: string
+    rememberMe?: boolean
+}
 
 export type TodolistType = {
     id: string
