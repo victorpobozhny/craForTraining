@@ -1,3 +1,7 @@
 {
-  "workbench.editor.languageDetection": false
+  "workbench.editor.languageDetection": false,
+  "cSpell.words": [
+    "todolist",
+    "todolists"
+  ]
 }
