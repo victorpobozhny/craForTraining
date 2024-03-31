@@ -1,9 +1,8 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { todolistsAPI, TodolistType } from "../../api/todolists-api";
-import { Dispatch } from "redux";
 import { appActions, RequestStatusType } from "../../app/appSlice";
-import { handleServerNetworkError } from "../../utils/error-utils";
 import { AppThunk } from "../../app/store";
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { handleServerNetworkError } from "../../utils/error-utils";
 
 const initialState: Array<TodolistDomainType> = [];
 
@@ -40,15 +39,21 @@ const slice = createSlice({
     },
     setTodolists: (state, action: PayloadAction<{ todolists: Array<TodolistType> }>) => {
       action.payload.todolists.forEach((tl) => {
-        state.push( { ...tl, filter: "all", entityStatus: "idle" });
-        console.log(current(state))
+        state.push({ ...tl, filter: "all", entityStatus: "idle" });
       });
     },
+    clearAppData: (state, action) => {
+      return initialState;
+    },
+  },
+  selectors: {
+    selectTodolists: (sliceState) => sliceState,
   },
 });
 
 export const todolistsReducer = slice.reducer;
 export const todolistsActions = slice.actions;
+export const todolistsSelectors = slice.selectors;
 
 // thunks
 export const fetchTodolistsTC = (): AppThunk => {

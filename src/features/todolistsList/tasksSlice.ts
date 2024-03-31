@@ -1,10 +1,9 @@
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { appActions } from "app/appSlice";
+import { todolistsActions } from "features/TodolistsList/todolistsSlice";
 import { TaskPriorities, TaskStatuses, TaskType, todolistsAPI, UpdateTaskModelType } from "../../api/todolists-api";
-import { Dispatch } from "redux";
 import { AppRootStateType, AppThunk } from "../../app/store";
 import { handleServerAppError, handleServerNetworkError } from "../../utils/error-utils";
-import { appActions } from "app/appSlice";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { todolistsActions } from "features/TodolistsList/todolistsSlice";
 
 const initialState: TasksStateType = {};
 
@@ -28,13 +27,13 @@ const slice = createSlice({
     ) => {
       const tasksArray = state[action.payload.todolistId];
       const index = tasksArray.findIndex((task) => task.id == action.payload.taskId);
-      if (index!==-1) {
+      if (index !== -1) {
         tasksArray[index] = { ...state[action.payload.todolistId][index], ...action.payload.model };
       }
     },
-    setTasks: (state, action: PayloadAction<{tasks: Array<TaskType>, todolistId: string}>)=>{
-        state[action.payload.todolistId] = [...state[action.payload.todolistId], ...action.payload.tasks]
-    }
+    setTasks: (state, action: PayloadAction<{ tasks: Array<TaskType>; todolistId: string }>) => {
+      state[action.payload.todolistId] = [...state[action.payload.todolistId], ...action.payload.tasks];
+    },
   },
   extraReducers(builder) {
     builder
@@ -48,12 +47,19 @@ const slice = createSlice({
         action.payload.todolists.forEach((tl: any) => {
           state[tl.id] = [];
         });
+      })
+      .addCase(todolistsActions.clearAppData, (state, action) => {
+        return initialState;
       });
+  },
+  selectors: {
+    selectTasks: (sliceState) => sliceState,
   },
 });
 
-export const tasksActions = slice.actions
-export const tasksReducer = slice.reducer
+export const tasksActions = slice.actions;
+export const tasksReducer = slice.reducer;
+export const tasksSelectors = slice.selectors;
 
 // thunks
 export const fetchTasksTC =
@@ -62,16 +68,18 @@ export const fetchTasksTC =
     dispatch(appActions.setAppStatus({ status: "loading" }));
     todolistsAPI.getTasks(todolistId).then((res) => {
       const tasks = res.data.items;
-      dispatch(tasksActions.setTasks({tasks: tasks, todolistId: todolistId}));
+      dispatch(tasksActions.setTasks({ tasks: tasks, todolistId: todolistId }));
       dispatch(appActions.setAppStatus({ status: "succeeded" }));
     });
   };
-export const removeTaskTC = (taskId: string, todolistId: string): AppThunk => (dispatch) => {
-  todolistsAPI.deleteTask(todolistId, taskId).then((res) => {
-    const action = tasksActions.removeTask({taskId: taskId,todolistId: todolistId});
-    dispatch(action);
-  });
-};
+export const removeTaskTC =
+  (taskId: string, todolistId: string): AppThunk =>
+  (dispatch) => {
+    todolistsAPI.deleteTask(todolistId, taskId).then((res) => {
+      const action = tasksActions.removeTask({ taskId: taskId, todolistId: todolistId });
+      dispatch(action);
+    });
+  };
 export const addTaskTC =
   (title: string, todolistId: string): AppThunk =>
   (dispatch) => {
@@ -81,7 +89,7 @@ export const addTaskTC =
       .then((res) => {
         if (res.data.resultCode === 0) {
           const task = res.data.data.item;
-          const action = tasksActions.addTask({task: task});
+          const action = tasksActions.addTask({ task: task });
           dispatch(action);
           dispatch(appActions.setAppStatus({ status: "succeeded" }));
         } else {
@@ -117,7 +125,7 @@ export const updateTaskTC =
       .updateTask(todolistId, taskId, apiModel)
       .then((res) => {
         if (res.data.resultCode === 0) {
-          const action = tasksActions.updateTask({taskId: taskId,model:  domainModel, todolistId});
+          const action = tasksActions.updateTask({ taskId: taskId, model: domainModel, todolistId });
           dispatch(action);
         } else {
           handleServerAppError(res.data, dispatch);
